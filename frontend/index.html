@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Text Extractor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>PDF Text Extractor</h2>
+        <form id="uploadForm">
+            <input type="text" id="api_key" name="api_key" placeholder="Enter LLM API Key" required>
+            <input type="file" id="pdf" name="pdf" accept="application/pdf" required>
+            <button type="submit">Extract Text</button>
+        </form>
+        <div id="response" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const llmApiKey = document.getElementById('api_key').value;
+            const pdfFile = document.getElementById('pdf').files[0];
+            const formData = new FormData();
+
+            formData.append('api_key', llmApiKey);
+            formData.append('pdf', pdfFile);
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('response').innerHTML =
+                        `<pre>${JSON.stringify(result.text, null, 2)}</pre>`;
+                } else {
+                    document.getElementById('response').innerHTML =
+                        `<p style="color: red;">Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('response').innerHTML =
+                    `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+
+</html>
